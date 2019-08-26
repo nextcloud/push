@@ -145,6 +145,14 @@ class Version0001Date20190801012345 extends SimpleMigrationStep {
 				'notnull' => true
 			]
 		);
+		$table->addColumn(
+			'displayed', Type::INTEGER,
+			[
+				'length'  => 11,
+				'notnull' => true,
+				'default' =>  0
+			]
+		);
 		$table->setPrimaryKey(['id']);
 
 		return $schema;
