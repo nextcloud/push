@@ -178,6 +178,7 @@ class PushRequest extends PushRequestBuilder {
 		$qb->limitToApp($app);
 		$qb->limitToKeyword($keyword);
 		$qb->limitToUserId($userId);
+		$qb->andWhere($qb->exprLimitToDBFieldInt('published', 0, '', true));
 
 		return $this->getItemFromRequest($qb);
 	}

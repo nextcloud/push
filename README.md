@@ -167,22 +167,65 @@ If you want to create an object that is only broadcast to callbacks, you can cre
 
 
 
+### Update an existing item
+
+It is possible to create unique item that can be edited over time.
+
+This is used in the Social App when a new account is following yours; the notification is identified by a **keyword** (here: _new_followers_).
+Please note that the _Time To Live_ is set to `TTL_FEW_HOUR`
+```php
+    $userId = 'cult';
+
+    $notification = new \OC\Push\Model\Helper\PushNotification('social', IPushItem::TTL_FEW_HOURS);
+    $notification->setTitle('Nextcloud Social');
+    $notification->setLevel(PushNotification::LEVEL_SUCCESS);
+    $notification->setMessage('accountA is following you');
+    $notification->addMetaArray('accounts', ['accountA']);
+    $notification->setKeyword('new_followers');      // identification of the PushItem
+    $notification->addUser($userId);
+
+    $pushHelper = $this->pushManager->getPushHelper();
+    $pushHelper->pushNotification($notification);
+```
+
+
+Now, before creating this notification, we should have checked that there is no already existing notifications about _new_followers_in the queue:
+ 
+
+
+```php
+$pushService = $this->pushManager->getPushService();
+    try {
+        $item = $pushService->getItemByKeyword('social', $userId, 'new_followers');
+        // already exists, get the current item, edit its content and save the edited object
+    } catch (ItemNotFoundException $e) {
+        // does not exists, create a new one.
+    }
+```
+
+
+If the precedent notification about _new_followers_ have been read by the recipient, we create a new one. If the recipient haven't read it, we can still edit the item:
+
+```php
+    $item->addMetaArray('accounts', 'accountB');
+    $accounts = $item->getMeta('accounts');
+    $newMessage = implode(', ', $accounts) . ' are now following you');
+
+    $payload = $item->getPayload();
+    $payload['message'] = $newMessage;
+    $item->setPayload($payload);
+    $pushService = $this->pushManager->getPushService();
+    $pushService->update($item);
+```
+
+_Note about `push()` and `update()`_:
+- `push()` will create a new item and erase any old item with the same keyword/userId/appId.
+- `update()`will only update existing item. There is no confirmation if the item was already published before or not.
 
 
 ### yay, animation.
 
+This is the Social App using the Push App to update its front-end when a new message is received.
 ![](https://raw.githubusercontent.com/nextcloud/push/master/documentations/SocialPush.gif)
 
 
-
-n=5
-
-- si init du poll: 
-* on recupere tous les published=0
-* on recupere tous les published de moins de n secondes
-
-
-- si pas init du poll:
-* on affiche tout
-
-rajouter un delay depuis le JS pour relancer le poll

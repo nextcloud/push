@@ -149,7 +149,6 @@ class Test extends Base {
 			$notification->setKeyword('test');
 			$notification->setMessage("If you cannot see this, it means it is not working.");
 			$notification->addUser($userId);
-
 			$pushHelper = $this->pushManager->getPushHelper();
 			$pushHelper->pushNotification($notification);
 
