@@ -164,6 +164,7 @@ If you want to create an object that is only broadcast to callbacks, you can cre
 
 ### Pushing your very own custom item
 
+_need to write something here._
 
 
 
@@ -221,6 +222,28 @@ If the precedent notification about _new_followers_ have been read by the recipi
 _Note about `push()` and `update()`_:
 - `push()` will create a new item and erase any old item with the same keyword/userId/appId.
 - `update()`will only update existing item. There is no confirmation if the item was already published before or not.
+
+
+
+
+### Testing the _PushItem Update_ with the ./occ command
+
+The `push:test` command comes with an option to register the testing notification using a _keyword_, 
+with a long enough TTL, allowing an admin to edit the content of the testing notification before the recipient
+of the notification open a session on the Nextcloud.
+
+- Assuming the recipient's username on Nextcloud is _cult_
+- Create the notification using the following command:
+
+>     ./occ push:test --keyword new cult
+
+- If the recipient is currently logged, a notification should be visible on Nextcloud
+- If not, try the following command to change the text of the notification:
+
+>     ./occ push:test --keyword 'An other message' cult
+
+- If the recipient haven't seen the first notification yet, the next time a session is opened on Nextcloud the testing notification will be edited.
+
 
 
 ### yay, animation.
