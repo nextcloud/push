@@ -42,15 +42,32 @@ use daita\NcSmallPhpTools\Db\ExtendedQueryBuilder;
 class PushQueryBuilder extends ExtendedQueryBuilder {
 
 
+
 	/**
-	 * Limit the request to the Interface
+	 * Limit the request to app
 	 *
-	 * @param string $recipient
+	 * @param string $app
 	 *
 	 * @return PushQueryBuilder
 	 */
-	public function limitToRecipient(string $recipient): PushQueryBuilder {
-		$this->limitToDBField('recipient', $recipient, true);
+	public function limitToApp(string $app): PushQueryBuilder {
+		$this->limitToDBField('app', $app, true);
+
+		return $this;
+	}
+
+
+
+
+	/**
+	 * Limit the request to keyword
+	 *
+	 * @param string $keyword
+	 *
+	 * @return PushQueryBuilder
+	 */
+	public function limitToKeyword(string $keyword): PushQueryBuilder {
+		$this->limitToDBField('keyword', $keyword, true);
 
 		return $this;
 	}

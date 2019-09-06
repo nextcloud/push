@@ -32,6 +32,7 @@ namespace OCA\Push\Db;
 
 
 use OC;
+use OCA\Push\Service\ConfigService;
 use OCA\Push\Service\MiscService;
 use OCP\IConfig;
 use OCP\IDBConnection;
@@ -54,6 +55,9 @@ class CoreRequestBuilder {
 	/** @var IDBConnection */
 	protected $dbConnection;
 
+	/** @var ConfigService */
+	protected $configService;
+
 	/** @var MiscService */
 	protected $miscService;
 
@@ -62,12 +66,16 @@ class CoreRequestBuilder {
 	 *
 	 * @param IConfig $config
 	 * @param IDBConnection $connection
+	 * @param ConfigService $configService
 	 * @param MiscService $miscService
 	 */
-	public function __construct(IConfig $config, IDBConnection $connection, MiscService $miscService
+	public function __construct(
+		IConfig $config, IDBConnection $connection, ConfigService $configService,
+		MiscService $miscService
 	) {
 		$this->config = $config;
 		$this->dbConnection = $connection;
+		$this->configService = $configService;
 		$this->miscService = $miscService;
 	}
 

@@ -135,6 +135,8 @@ class PushHelper implements IPushHelper {
 		$item->setSource($callback->getSource());
 		$item->setTtl(IPushItem::TTL_INSTANT);
 		$item->setPayload($callback->getPayload());
+		$item->setKeyword($callback->getKeyword());
+		$item->setMeta($callback->getMeta());
 
 		$this->fillMeta($item, $callback);
 
@@ -164,8 +166,10 @@ class PushHelper implements IPushHelper {
 	 */
 	public function generateFromNotification(IPushNotification $notification): IPushWrapper {
 		$item = new PushItem($notification->getApp(), IPushNotification::TYPE);
-		$item->setSource($notification->getTitle());
+		$item->setSource($notification->getSource());
 		$item->setTtl($notification->getTtl());
+		$item->setKeyword($notification->getKeyword());
+		$item->setMeta($notification->getMeta());
 		$item->setPayload(
 			[
 				'message' => $notification->getMessage(),
@@ -203,6 +207,8 @@ class PushHelper implements IPushHelper {
 		$item = new PushItem($event->getApp(), IPushEvent::TYPE);
 		$item->setSource($event->getCommand());
 		$item->setTtl(IPushItem::TTL_INSTANT);
+		$item->setKeyword($event->getKeyword());
+		$item->setMeta($event->getMeta());
 		$item->setPayload($event->getPayload());
 
 		$this->fillMeta($item, $event);

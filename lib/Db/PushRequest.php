@@ -32,10 +32,11 @@ namespace OCA\Push\Db;
 
 
 use Exception;
-use OCA\Push\Exceptions\ItemNotFoundException;
-use OCA\Push\Exceptions\UnknownStreamTypeException;
 use OCA\Push\Model\Polling;
+use OCA\Push\Service\ConfigService;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\Push\Exceptions\ItemNotFoundException;
+use OCP\Push\Exceptions\UnknownStreamTypeException;
 use OCP\Push\Model\IPushItem;
 use OCP\Push\Model\IPushWrapper;
 
@@ -49,6 +50,15 @@ class PushRequest extends PushRequestBuilder {
 
 
 	/**
+	 * In case of events sent to the front-end instant before a refreshing/change page.
+	 * events published up to (seconds) ago are returned (again) on the next
+	 * first polling request from a fresh page.
+	 */
+	const PUBLISHED_DELAY = 5;
+
+
+	/**
+	 *
 	 * @param IPushWrapper $wrapper
 	 */
 	public function save(IPushWrapper $wrapper) {
@@ -67,20 +77,29 @@ class PushRequest extends PushRequestBuilder {
 			if ($userId === $prec) {
 				continue;
 			}
-
 			$prec = $userId;
+
+			try {
+				if ($item->getKeyword() === '') {
+					throw new ItemNotFoundException();
+				}
+
+				$previous = $this->getItemByKeyword($item->getApp(), $userId, $item->getKeyword());
+				$this->delete($previous->getId());
+			} catch (Exception $e) {
+			}
+
 			try {
 				$qb = $this->getPushInsertSql();
 				$qb->setValue('token', $qb->createNamedParameter($item->getToken()))
 				   ->setValue('app', $qb->createNamedParameter($item->getApp()))
 				   ->setValue('source', $qb->createNamedParameter($item->getSource()))
+				   ->setValue('keyword', $qb->createNamedParameter($item->getKeyword()))
 				   ->setValue('type', $qb->createNamedParameter($item->getType()))
 				   ->setValue('meta', $qb->createNamedParameter(json_encode($item->getMeta())))
 				   ->setValue('user_id', $qb->createNamedParameter($userId))
 				   ->setValue('ttl', $qb->createNamedParameter($item->getTtl()))
-				   ->setValue(
-					   'payload', $qb->createNamedParameter(json_encode($item->getPayload()))
-				   )
+				   ->setValue('payload', $qb->createNamedParameter(json_encode($item->getPayload())))
 				   ->setValue('creation', $qb->createNamedParameter($item->getCreation()));
 
 				$qb->execute();
@@ -92,18 +111,46 @@ class PushRequest extends PushRequestBuilder {
 
 
 	/**
+	 * @param IPushItem $item
+	 */
+	public function update(IPushItem $item) {
+		$qb = $this->getPushUpdateSql();
+		$qb->set('meta', $qb->createNamedParameter(json_encode($item->getMeta())))
+		   ->set('payload', $qb->createNamedParameter(json_encode($item->getPayload())));
+
+		$qb->limitToId($item->getId());
+		$qb->execute();
+	}
+
+
+	/**
 	 * return int
 	 *
 	 * @param Polling $polling
+	 * @param bool $includeAll
 	 *
 	 * @throws ItemNotFoundException
 	 */
-	public function fillPollingWithItems(Polling $polling): void {
+	public function fillPollingWithItems(Polling $polling, bool $includeAll = true): void {
 		$qb = $this->getPushSelectSql();
 		$qb->orderBy('id', 'asc');
 		// TODO: set limit !
 		$qb->limitToUserId($polling->getUserId());
 		$qb->limitToNewerStreams($polling->getLastEventId());
+
+		if (!$includeAll) {
+			$delay = $this->configService->getAppValue(ConfigService::DELAY_POLLING);
+			$expr = $qb->expr();
+			$func = $qb->func();
+
+			$andX = $expr->andX();
+			$andX->add($qb->exprLimitToDBFieldInt('published', 0, '', false));
+			$andX->add($expr->gte($func->add('published', $delay), $qb->createNamedParameter(time())));
+
+			$orX = $expr->orX();
+			$orX->add($qb->exprLimitToDBFieldInt('published', 0, '', true));
+			$orX->add($andX);
+		}
 
 		$lastId = 0;
 		$items = $this->getListFromRequest($qb, $lastId);
@@ -118,6 +165,26 @@ class PushRequest extends PushRequestBuilder {
 
 
 	/**
+	 * @param string $app
+	 * @param string $userId
+	 * @param string $keyword
+	 *
+	 * @return IPushItem
+	 * @throws ItemNotFoundException
+	 * @throws UnknownStreamTypeException
+	 */
+	public function getItemByKeyword(string $app, string $userId, string $keyword): IPushItem {
+		$qb = $this->getPushSelectSql();
+		$qb->limitToApp($app);
+		$qb->limitToKeyword($keyword);
+		$qb->limitToUserId($userId);
+		$qb->andWhere($qb->exprLimitToDBFieldInt('published', 0, '', true));
+
+		return $this->getItemFromRequest($qb);
+	}
+
+
+	/**
 	 *
 	 */
 	public function removeExpiredItems() {
@@ -126,6 +193,7 @@ class PushRequest extends PushRequestBuilder {
 		$func = $qb->func();
 
 		$qb->andWhere($expr->lt($func->add('creation', 'ttl'), $qb->createNamedParameter(time())));
+
 		$qb->execute();
 	}
 
@@ -133,9 +201,10 @@ class PushRequest extends PushRequestBuilder {
 	/**
 	 * @param array $ids
 	 */
-	public function removeIds(array $ids) {
-		$qb = $this->getPushDeleteSql();
+	public function publishedIds(array $ids) {
+		$qb = $this->getPushUpdateSql();
 		$qb->limitToList('id', $ids);
+		$qb->set('published', $qb->createNamedParameter(time()));
 
 		$qb->execute();
 	}
@@ -150,7 +219,6 @@ class PushRequest extends PushRequestBuilder {
 
 		$qb->execute();
 	}
-
 
 	/**
 	 * @param IQueryBuilder $qb

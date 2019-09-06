@@ -32,7 +32,7 @@ namespace OCA\Push\Db;
 
 use daita\NcSmallPhpTools\Traits\TArrayTools;
 use OC\Push\Model\PushItem;
-use OCA\Push\Exceptions\UnknownStreamTypeException;
+use OCP\Push\Exceptions\UnknownStreamTypeException;
 use OCP\Push\Model\IPushItem;
 
 
@@ -83,7 +83,7 @@ class PushRequestBuilder extends CoreRequestBuilder {
 
 		/** @noinspection PhpMethodParametersCountMismatchInspection */
 		$qb->select(
-			's.id', 's.token', 's.app', 's.source', 's.type', 's.user_id', 's.ttl', 's.payload',
+			's.id', 's.token', 's.app', 's.source', 's.keyword', 's.type', 's.user_id', 's.ttl', 's.payload',
 			's.meta', 's.creation'
 		)
 		   ->from(self::TABLE_PUSH, 's');

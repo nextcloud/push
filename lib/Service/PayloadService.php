@@ -31,10 +31,10 @@ declare(strict_types=1);
 namespace OCA\Push\Service;
 
 
-use daita\MySmallPhpTools\Traits\TArrayTools;
+use daita\NcSmallPhpTools\Traits\TArrayTools;
 use OCA\Push\Db\PushRequest;
-use OCA\Push\Exceptions\ItemNotFoundException;
 use OCA\Push\Model\Polling;
+use OCP\Push\Exceptions\ItemNotFoundException;
 use OCP\Push\Model\IPushItem;
 
 
@@ -104,7 +104,7 @@ class PayloadService {
 		$polling->addMetaInt('delay', (int)$delay);
 
 		try {
-			$this->fillPolling($polling);
+			$this->fillPolling($polling, false);
 		} catch (ItemNotFoundException $e) {
 			$polling->setStatus(1);
 			$polling->setLastEventId(0);
@@ -114,12 +114,13 @@ class PayloadService {
 
 	/**
 	 * @param Polling $polling
+	 * @param bool $includeAll - include recently published events.
 	 *
 	 * @throws ItemNotFoundException
 	 */
-	private function fillPolling(Polling $polling) {
-		$this->pushRequest->fillPollingWithItems($polling);
-		$this->removeItems($polling);
+	private function fillPolling(Polling $polling, bool $includeAll = true) {
+		$this->pushRequest->fillPollingWithItems($polling, $includeAll);
+		$this->publishedItems($polling);
 	}
 
 
@@ -130,7 +131,7 @@ class PayloadService {
 		$delay = (int)$this->configService->getAppValue(ConfigService::DELAY_POLLING);
 		while (true) {
 			try {
-				$this->fillPolling($polling);
+				$this->fillPolling($polling, true);
 
 				return;
 			} catch (ItemNotFoundException $e) {
@@ -153,32 +154,15 @@ class PayloadService {
 	/**
 	 * @param Polling $polling
 	 */
-	private function removeItems(Polling $polling) {
+	private function publishedItems(Polling $polling) {
 		$ids = array_map(
 			function(IPushItem $stream): int {
 				return $stream->getId();
 			}, $polling->getItems()
 		);
 
-		$this->pushRequest->removeIds($ids);
+		$this->pushRequest->publishedIds($ids);
 	}
-
-
-
-//
-//
-//	/**
-//	 * @param WidgetEvent[] $events
-//	 * @param int $lastEventId
-//	 */
-//	private function updateLastEventId(array $events, int &$lastEventId) {
-//		foreach ($events as $event) {
-//			if ($event->getId() > $lastEventId) {
-//				$lastEventId = $event->getId();
-//			}
-//		}
-//	}
-//
 
 }
 
