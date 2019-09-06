@@ -31,7 +31,7 @@ declare(strict_types=1);
 namespace OCA\Push\Model;
 
 
-use daita\MySmallPhpTools\Traits\TArrayTools;
+use daita\NcSmallPhpTools\Traits\TArrayTools;
 use JsonSerializable;
 use OCP\Push\Model\IPushItem;
 

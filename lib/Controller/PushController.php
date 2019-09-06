@@ -31,7 +31,7 @@ declare(strict_types=1);
 namespace OCA\Push\Controller;
 
 
-use daita\MySmallPhpTools\Traits\Nextcloud\TNCDataResponse;
+use daita\NcSmallPhpTools\Traits\Nextcloud\TNCDataResponse;
 use Exception;
 use OCA\Push\AppInfo\Application;
 use OCA\Push\Model\Polling;

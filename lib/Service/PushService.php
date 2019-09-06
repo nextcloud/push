@@ -34,6 +34,9 @@ namespace OCA\Push\Service;
 use OCA\Push\Db\PushRequest;
 use OCP\IGroupManager;
 use OCP\IUser;
+use OCP\Push\Exceptions\ItemNotFoundException;
+use OCP\Push\Exceptions\UnknownStreamTypeException;
+use OCP\Push\Model\IPushItem;
 use OCP\Push\Model\IPushRecipients;
 use OCP\Push\Model\IPushWrapper;
 use OCP\Push\Service\IPushService;
@@ -82,8 +85,30 @@ class PushService implements IPushService {
 	/**
 	 * @param IPushWrapper $wrapper
 	 */
-	public function push(IPushWrapper $wrapper) {
+	public function push(IPushWrapper $wrapper): void {
 		$this->pushRequest->save($wrapper);
+	}
+
+
+	/**
+	 * @param IPushItem $item
+	 */
+	public function update(IPushItem $item): void {
+		$this->pushRequest->update($item);
+	}
+
+
+	/**
+	 * @param string $app
+	 * @param string $userId
+	 * @param string $keyword
+	 *
+	 * @return IPushItem
+	 * @throws ItemNotFoundException
+	 * @throws UnknownStreamTypeException
+	 */
+	public function getItemByKeyword(string $app, string $userId, string $keyword): IPushItem {
+		return $this->pushRequest->getItemByKeyword($app, $userId, $keyword);
 	}
 
 
@@ -91,7 +116,7 @@ class PushService implements IPushService {
 	 * @param IPushWrapper $wrapper
 	 * @param IPushRecipients $recipients
 	 */
-	public function fillRecipients(IPushWrapper $wrapper, IPushRecipients $recipients) {
+	public function fillRecipients(IPushWrapper $wrapper, IPushRecipients $recipients): void {
 		$users = $recipients->getUsers();
 		$users = array_merge($users, $this->getUsersFromGroups($recipients->getGroups()));
 

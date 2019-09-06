@@ -33,17 +33,26 @@ namespace OCA\Push\Command;
 
 use Exception;
 use OC\Core\Command\Base;
+use OC\Push\Model\Helper\PushNotification;
 use OCA\Push\Service\ConfigService;
 use OCA\Push\Service\MiscService;
 use OCP\IUserManager;
+use OCP\Push\Exceptions\ItemNotFoundException;
+use OCP\Push\Exceptions\PushInstallException;
+use OCP\Push\Exceptions\UnknownStreamTypeException;
 use OCP\Push\IPushManager;
+use OCP\Push\Model\IPushItem;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 
 class Test extends Base {
 
+
+	/** @var OutputInterface */
+	private $output;
 
 	/** @var IUserManager */
 	private $userManager;
@@ -86,6 +95,9 @@ class Test extends Base {
 		parent::configure();
 		$this->setName('push:test')
 			 ->addArgument('user', InputArgument::REQUIRED, 'user')
+			 ->addOption(
+				 'keyword', 'k', InputOption::VALUE_REQUIRED, 'editable content, using keyword', ''
+			 )
 			 ->setDescription('Nextcloud Push testing tools');
 	}
 
@@ -97,6 +109,8 @@ class Test extends Base {
 	 * @throws Exception
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output) {
+		$this->output = $output;
+
 		$userId = $input->getArgument('user');
 
 		$user = $this->userManager->get($userId);
@@ -108,8 +122,65 @@ class Test extends Base {
 			throw new Exception('Nextcloud Push is not available');
 		}
 
+		if (($keyword = $input->getOption('keyword')) !== '') {
+			$this->manageKeyword($userId, $keyword);
+
+			return;
+		}
+
 		$pushHelper = $this->pushManager->getPushHelper();
 		$pushHelper->test($userId);
+	}
+
+
+	/**
+	 * @param string $userId
+	 * @param string $keyword
+	 *
+	 * @throws PushInstallException
+	 * @throws UnknownStreamTypeException
+	 */
+	private function manageKeyword(string $userId, string $keyword) {
+
+		if ($keyword === 'new') {
+			$notification = new PushNotification('push', IPushItem::TTL_FEW_HOURS);
+			$notification->setTitle('Testing Push');
+			$notification->setLevel(PushNotification::LEVEL_SUCCESS);
+			$notification->setKeyword('test');
+			$notification->setMessage("If you cannot see this, it means it is not working.");
+			$notification->addUser($userId);
+			$pushHelper = $this->pushManager->getPushHelper();
+			$pushHelper->pushNotification($notification);
+
+			return;
+		}
+
+		$pushService = $this->pushManager->getPushService();
+		try {
+			$item = $pushService->getItemByKeyword('push', $userId, 'test');
+		} catch (ItemNotFoundException $e) {
+			$this->output->writeln('Item not available anymore. Run ./occ push:test --keyword new');
+
+			return;
+		}
+
+		$this->output->writeln('Current Item: ');
+		$this->output->writeln(json_encode($item, JSON_PRETTY_PRINT));
+
+		$payload = $item->getPayload();
+		$payload['message'] = $keyword;
+		$item->setPayload($payload);
+		$pushService->update($item);
+
+		try {
+			$item = $pushService->getItemByKeyword('push', $userId, 'test');
+			$this->output->writeln('');
+			$this->output->writeln('New Item: ');
+
+			$this->output->writeln(json_encode($item, JSON_PRETTY_PRINT));
+		} catch (ItemNotFoundException $e) {
+		} catch (UnknownStreamTypeException $e) {
+		}
 	}
 
 }

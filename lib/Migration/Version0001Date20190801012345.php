@@ -66,13 +66,15 @@ class Version0001Date20190801012345 extends SimpleMigrationStep {
 		 * - id             int
 		 * - token          string
 		 * - app            string
-		 * - source        string
+		 * - source         string
+		 * - keyword        string
 		 * - type           string
 		 * - user_id        string
 		 * - ttl            int
 		 * - payload        text
 		 * - meta           text
 		 * - creation       int
+		 * - published      int
 		 */
 		$table = $schema->createTable('push');
 		$table->addColumn(
@@ -103,6 +105,13 @@ class Version0001Date20190801012345 extends SimpleMigrationStep {
 			[
 				'notnull' => true,
 				'length'  => 127
+			]
+		);
+		$table->addColumn(
+			'keyword', Type::STRING,
+			[
+				'notnull' => true,
+				'length'  => 63
 			]
 		);
 		$table->addColumn(
@@ -146,11 +155,11 @@ class Version0001Date20190801012345 extends SimpleMigrationStep {
 			]
 		);
 		$table->addColumn(
-			'displayed', Type::INTEGER,
+			'published', Type::INTEGER,
 			[
 				'length'  => 11,
 				'notnull' => true,
-				'default' =>  0
+				'default' => 0
 			]
 		);
 		$table->setPrimaryKey(['id']);
