@@ -173,3 +173,16 @@ If you want to create an object that is only broadcast to callbacks, you can cre
 
 ![](https://raw.githubusercontent.com/nextcloud/push/master/documentations/SocialPush.gif)
 
+
+
+n=5
+
+- si init du poll: 
+* on recupere tous les published=0
+* on recupere tous les published de moins de n secondes
+
+
+- si pas init du poll:
+* on affiche tout
+
+rajouter un delay depuis le JS pour relancer le poll
