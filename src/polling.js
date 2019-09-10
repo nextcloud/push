@@ -24,7 +24,7 @@
  */
 
 import Vue from 'vue'
-import Polling from './components/Polling'
+import Polling from './components/Polling.vue'
 
 // eslint-disable-next-line
 __webpack_public_path__ = OC.linkTo('push', 'js/')
