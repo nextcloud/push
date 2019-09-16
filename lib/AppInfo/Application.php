@@ -1,6 +1,4 @@
-<?php
-declare(strict_types=1);
-
+<?php declare(strict_types=1);
 
 /**
  * Push - Nextcloud Push Service
@@ -27,35 +25,24 @@ declare(strict_types=1);
  *
  */
 
-
 namespace OCA\Push\AppInfo;
-
 
 use OC;
 use OCA\Push\Helper\PushHelper;
+use OCA\Push\Listener\BroadcastListener;
 use OCA\Push\Service\Extensions\NextcloudFilesAppService;
 use OCA\Push\Service\PushService;
 use OCP\AppFramework\App;
 use OCP\AppFramework\IAppContainer;
 use OCP\AppFramework\QueryException;
+use OCP\Broadcast\Events\IBroadcastEvent;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Push\IPushManager;
 use OCP\Util;
 
-
-/**
- * Class Application
- *
- * @package OCA\Push\AppInfo
- */
 class Application extends App {
 
-
 	const APP_NAME = 'push';
-
-
-	/** @var IAppContainer */
-	private $container;
-
 
 	/**
 	 * @param array $params
@@ -63,41 +50,7 @@ class Application extends App {
 	public function __construct(array $params = []) {
 		parent::__construct(self::APP_NAME, $params);
 
-		$this->container = $this->getContainer();
+		BootstrapSingleton::getInstance($this->getContainer())->boot();
 	}
-
-
-	/**
-	 *
-	 */
-	public function registerPush() {
-		try {
-			/** @var IPushManager $pushManager */
-			$pushManager = $this->container->query(IPushManager::class);
-			$pushService = $this->container->query(PushService::class);
-			$pushHelper = $this->container->query(PushHelper::class);
-			$pushManager->registerPushApp($pushService, $pushHelper);
-
-			Util::addScript('push', 'polling');
-		} catch (QueryException $e) {
-			OC::$server->getLogger()
-					   ->log(1, 'issue while registering Nextcloud Push : ' . $e->getMessage());
-		}
-	}
-
-
-	/**
-	 *
-	 */
-	public function registerExtensions() {
-		$eventDispatcher = OC::$server->getEventDispatcher();
-		try {
-			$extendsFilesApp = $this->container->query(NextcloudFilesAppService::class);
-			$extendsFilesApp->attach($eventDispatcher);
-		} catch (QueryException $e) {
-		}
-	}
-
 
 }
-

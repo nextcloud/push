@@ -23,8 +23,4 @@
 	<dependencies>
 		<nextcloud min-version="18" max-version="18"/>
 	</dependencies>
-
-	<commands>
-		<command>OCA\Push\Command\Test</command>
-	</commands>
 </info>

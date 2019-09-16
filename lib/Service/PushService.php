@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-
 /**
  * Push - Nextcloud Push Service
  *
@@ -30,125 +29,27 @@ declare(strict_types=1);
 
 namespace OCA\Push\Service;
 
-
-use OCA\Push\Db\PushRequest;
+use JsonSerializable;
 use OCP\IGroupManager;
 use OCP\IUser;
-use OCP\Push\Exceptions\ItemNotFoundException;
-use OCP\Push\Exceptions\UnknownStreamTypeException;
-use OCP\Push\Model\IPushItem;
-use OCP\Push\Model\IPushRecipients;
-use OCP\Push\Model\IPushWrapper;
-use OCP\Push\Service\IPushService;
 
+class PushService {
 
-/**
- * Class PushService
- *
- * @package OCA\Push\Service
- */
-class PushService implements IPushService {
+	/** @var GatewayFactory */
+	private $gatewayFactory;
 
-
-	/** @var IGroupManager */
-	private $groupManager;
-
-	/** @var PushRequest */
-	private $pushRequest;
-
-	/** @var ConfigService */
-	private $configService;
-
-	/** @var MiscService */
-	private $miscService;
-
-
-	/**
-	 * PushService constructor.
-	 *
-	 * @param IGroupManager $groupManager
-	 * @param PushRequest $pushRequest
-	 * @param ConfigService $configService
-	 * @param MiscService $miscService
-	 */
-	public function __construct(
-		IGroupManager $groupManager, PushRequest $pushRequest, ConfigService $configService,
-		MiscService $miscService
-	) {
-		$this->groupManager = $groupManager;
-		$this->pushRequest = $pushRequest;
-		$this->configService = $configService;
-		$this->miscService = $miscService;
+	public function __construct(GatewayFactory $gatewayFactory) {
+		$this->gatewayFactory = $gatewayFactory;
 	}
 
-
-	/**
-	 * @param IPushWrapper $wrapper
-	 */
-	public function push(IPushWrapper $wrapper): void {
-		$this->pushRequest->save($wrapper);
+	public function push(string $name,
+						 string $channel,
+						 JsonSerializable $payload) {
+		$this->gatewayFactory->getGateway()->push(
+			$name,
+			$channel,
+			$payload
+		);
 	}
 
-
-	/**
-	 * @param IPushItem $item
-	 */
-	public function update(IPushItem $item): void {
-		$this->pushRequest->update($item);
-	}
-
-
-	/**
-	 * @param string $app
-	 * @param string $userId
-	 * @param string $keyword
-	 *
-	 * @return IPushItem
-	 * @throws ItemNotFoundException
-	 * @throws UnknownStreamTypeException
-	 */
-	public function getItemByKeyword(string $app, string $userId, string $keyword): IPushItem {
-		return $this->pushRequest->getItemByKeyword($app, $userId, $keyword);
-	}
-
-
-	/**
-	 * @param IPushWrapper $wrapper
-	 * @param IPushRecipients $recipients
-	 */
-	public function fillRecipients(IPushWrapper $wrapper, IPushRecipients $recipients): void {
-		$users = $recipients->getUsers();
-		$users = array_merge($users, $this->getUsersFromGroups($recipients->getGroups()));
-
-		$remove = $recipients->getRemovedUsers();
-		$remove = array_merge($remove, $this->getUsersFromGroups($recipients->getRemovedGroups()));
-
-		$users = array_values(array_diff($users, $remove));
-		$wrapper->setRecipients($users);
-	}
-
-
-	/**
-	 * @param array $groups
-	 *
-	 * @return array
-	 */
-	private function getUsersFromGroups(array $groups): array {
-		$users = [];
-		foreach ($groups as $groupName) {
-			$group = $this->groupManager->get($groupName);
-			$users = array_merge(
-				$users, array_values(
-						  array_map(
-							  function(IUser $user) {
-								  return $user->getUID();
-							  }, $group->getUsers()
-						  )
-					  )
-			);
-		}
-
-		return $users;
-	}
 }
-
