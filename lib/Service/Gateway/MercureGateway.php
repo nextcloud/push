@@ -27,7 +27,7 @@ class MercureGateway implements IPushGateway {
 	public function push(string $name, string $channel, JsonSerializable $payload): void {
 		$client = $this->clientService->newClient();
 
-		$response = $client->post(
+		$client->post(
 			$this->url,
 			[
 				'headers' => [
@@ -40,10 +40,6 @@ class MercureGateway implements IPushGateway {
 				]
 			]
 		);
-
-		$h = $response->getHeaders();
-		$body = $response->getBody();
-		$x = 4;
 	}
 
 	public function getUrl(): string {
