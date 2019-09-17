@@ -1,6 +1,4 @@
-<?php
-declare(strict_types=1);
-
+<?php declare(strict_types=1);
 
 /**
  * Push - Nextcloud Push Service
@@ -27,10 +25,8 @@ declare(strict_types=1);
  *
  */
 
-
 return [
 	'routes' => [
-		['name' => 'Push#polling', 'url' => '/polling/{eventId}', 'verb' => 'GET']
+		['name' => 'Poll#index', 'url' => '/poll', 'verb' => 'GET']
 	]
 ];
-
