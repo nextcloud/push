@@ -2,7 +2,9 @@
 
 namespace OCA\Push\Service\Gateway;
 
+use Exception;
 use JsonSerializable;
+use OCA\Push\Exception\PushException;
 use OCP\Http\Client\IClientService;
 
 class MercureGateway implements IPushGateway {
@@ -24,22 +26,29 @@ class MercureGateway implements IPushGateway {
 		$this->clientService = $clientService;
 	}
 
-	public function push(string $name, string $channel, JsonSerializable $payload): void {
+	public function push(string $name,
+						 string $channel,
+						 string $uid,
+						 JsonSerializable $payload): void {
 		$client = $this->clientService->newClient();
 
-		$client->post(
-			$this->url,
-			[
-				'headers' => [
-					'Authorization' => 'Bearer ' . $this->jwt,
-				],
-				'auth_bearer' => $this->jwt,
-				'body' => [
-					'topic' => $channel,
-					'data' => json_encode($payload->jsonSerialize()),
+		try {
+			$client->post(
+				$this->url,
+				[
+					'headers' => [
+						'Authorization' => 'Bearer ' . $this->jwt,
+					],
+					'auth_bearer' => $this->jwt,
+					'body' => [
+						'topic' => $channel,
+						'data' => json_encode($payload->jsonSerialize()),
+					]
 				]
-			]
-		);
+			);
+		} catch (Exception $e) {
+			throw new PushException("Could not push event to Mercure", 0, $e);
+		}
 	}
 
 	public function getUrl(): string {

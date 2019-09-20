@@ -21,13 +21,17 @@ class BroadcastListener implements IEventListener {
 			return;
 		}
 
-		foreach ($event->getChannels() as $channel) {
+		foreach ($event->getUids() as $uid) {
 			$this->pushService->push(
 				$event->getName(),
-				$channel,
+				$event->getChannel(),
+				$uid,
 				$event->getPayload()
 			);
 		}
+
+		// Confirm broadcasting to emitter
+		$event->setBroadcasted();
 	}
 
 }

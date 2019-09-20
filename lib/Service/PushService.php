@@ -44,10 +44,12 @@ class PushService {
 
 	public function push(string $name,
 						 string $channel,
+						 string $uid,
 						 JsonSerializable $payload) {
 		$this->gatewayFactory->getGateway()->push(
 			$name,
 			$channel,
+			$uid,
 			$payload
 		);
 	}
