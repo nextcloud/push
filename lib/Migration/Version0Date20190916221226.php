@@ -29,6 +29,9 @@ class Version0Date20190916221226 extends SimpleMigrationStep {
 			'notnull' => true,
 			'unsigned' => true,
 		]);
+		$table->addColumn('name', 'string', [
+			'notnull' => true,
+		]);
 		$table->addColumn('channel', 'string', [
 			'notnull' => true,
 		]);

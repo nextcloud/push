@@ -30,6 +30,7 @@ declare(strict_types=1);
 namespace OCA\Push\Service;
 
 use JsonSerializable;
+use OCA\Push\Exception\ServiceException;
 use OCP\IGroupManager;
 use OCP\IUser;
 
@@ -42,6 +43,13 @@ class PushService {
 		$this->gatewayFactory = $gatewayFactory;
 	}
 
+	/**
+	 * @param string $name
+	 * @param string $channel
+	 * @param string $uid
+	 * @param JsonSerializable $payload
+	 * @throws ServiceException
+	 */
 	public function push(string $name,
 						 string $channel,
 						 string $uid,

@@ -2,18 +2,25 @@
 
 namespace OCA\Push\Listener;
 
+use OCA\Push\Exception\ServiceException;
 use OCA\Push\Service\PushService;
 use OCP\Broadcast\Events\IBroadcastEvent;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use OCP\ILogger;
 
 class BroadcastListener implements IEventListener {
 
 	/** @var PushService */
 	private $pushService;
 
-	public function __construct(PushService $pushService) {
+	/** @var ILogger */
+	private $logger;
+
+	public function __construct(PushService $pushService,
+								ILogger $logger) {
 		$this->pushService = $pushService;
+		$this->logger = $logger;
 	}
 
 	public function handle(Event $event): void {
@@ -22,12 +29,18 @@ class BroadcastListener implements IEventListener {
 		}
 
 		foreach ($event->getUids() as $uid) {
-			$this->pushService->push(
-				$event->getName(),
-				$event->getChannel(),
-				$uid,
-				$event->getPayload()
-			);
+			try {
+				$this->pushService->push(
+					$event->getName(),
+					$event->getChannel(),
+					$uid,
+					$event->getPayload()
+				);
+			} catch (ServiceException $e) {
+				$this->logger->logException($e, [
+					'message' => 'Could not push ' . $event->getName() . ' event',
+				]);
+			}
 		}
 
 		// Confirm broadcasting to emitter

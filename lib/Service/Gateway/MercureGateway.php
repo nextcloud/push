@@ -39,7 +39,6 @@ class MercureGateway implements IPushGateway {
 					'headers' => [
 						'Authorization' => 'Bearer ' . $this->jwt,
 					],
-					'auth_bearer' => $this->jwt,
 					'body' => [
 						'topic' => $channel,
 						'data' => json_encode($payload->jsonSerialize()),
