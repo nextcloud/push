@@ -12,15 +12,18 @@ class PushEventMapper extends QBMapper {
 	}
 
 	/**
+	 * @param string $userId
 	 * @param int $time
+	 *
 	 * @return PushEvent[]
 	 */
-	public function findSince(int $time): array {
+	public function findSince(string $userId, int $time): array {
 		$qb = $this->db->getQueryBuilder();
 
 		$query = $qb->select('*')
 			->from($this->getTableName())
-			->where($qb->expr()->gte('created_at', $qb->createNamedParameter($time)));
+			->where($qb->expr()->eq('uid', $qb->createNamedParameter($userId)))
+			->andWhere($qb->expr()->gt('created_at', $qb->createNamedParameter($time)));
 
 		return $this->findEntities($query);
 	}

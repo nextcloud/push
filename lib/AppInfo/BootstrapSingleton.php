@@ -28,6 +28,7 @@ use OCA\Push\Listener\CspListener;
 use OCA\Push\Service\Gateway\MercureGateway;
 use OCA\Push\Service\GatewayFactory;
 use OCP\AppFramework\IAppContainer;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Broadcast\Events\IBroadcastEvent;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IInitialStateService;
@@ -69,15 +70,28 @@ class BootstrapSingleton {
 	}
 
 	private function registerClientSideAdapter(IAppContainer $container) {
-		/** @var GatewayFactory $factory */
-		$factory = $container->query(GatewayFactory::class);
-		$gateway = $factory->getGateway();
-		if ($gateway instanceof MercureGateway) {
-			/** @var IInitialStateService $initialState */
-			$initialState = $container->query(IInitialStateService::class);
-			$initialState->provideInitialState(Application::APP_NAME, 'mercure_url', $gateway->getUrl());
-			Util::addScript(Application::APP_NAME, 'mercure-bus-adapter');
-		}
+		Util::addScript(Application::APP_NAME, 'event-bus-adapter');
+
+		/** @var IInitialStateService $initialState */
+		$initialState = $container->query(IInitialStateService::class);
+		$initialState->provideLazyInitialState(Application::APP_NAME, 'config', function () {
+			/** @var GatewayFactory $factory */
+			$factory = $this->container->query(GatewayFactory::class);
+			/** @var ITimeFactory $timeFactory */
+			$timeFactory = $this->container->query(ITimeFactory::class);
+			$gateway = $factory->getGateway();
+			if ($gateway instanceof MercureGateway) {
+				return [
+					'gateway' => 'mercure',
+					'hubUrl' => $gateway->getUrl(),
+				];
+			}
+
+			return [
+				'gateway' => 'poll',
+				'now' => $timeFactory->getTime(),
+			];
+		});
 	}
 
 	private function registerEvents(IAppContainer $container): void {

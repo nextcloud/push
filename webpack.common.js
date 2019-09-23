@@ -29,7 +29,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
 	entry: {
-		'mercure-bus-adapter': path.join(__dirname, 'src', 'mercure-bus-adapter.js'),
+		'event-bus-adapter': path.join(__dirname, 'src', 'event-bus-adapter.js'),
 		polling: path.join(__dirname, 'src', 'polling.js')
 	},
 	output: {

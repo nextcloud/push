@@ -26,7 +26,6 @@ class PollGateway implements IPushGateway {
 						 JsonSerializable $payload): void {
 		$pushEvent = new PushEvent();
 		$pushEvent->setName($name);
-		$pushEvent->setChannel($channel);
 		$pushEvent->setUid($uid);
 		$pushEvent->setPayload(json_encode($payload->jsonSerialize()));
 		$pushEvent->setCreatedAt($this->timeFactory->getTime());

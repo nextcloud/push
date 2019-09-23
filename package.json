@@ -27,6 +27,8 @@
 		"nextcloud-event-bus": "0.0.3",
 		"nextcloud-initial-state": "0.0.3",
 		"nextcloud-vue": "^0.13.0",
+		"nextcloud-logger": "0.0.6",
+		"nextcloud-router": "0.0.9",
 		"vue": "latest"
 	},
 	"browserslist": [

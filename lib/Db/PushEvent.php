@@ -8,8 +8,6 @@ use OCP\AppFramework\Db\Entity;
 /**
  * @method string getName()
  * @method void setName(string $name)
- * @method string getChannel()
- * @method void setChannel(string $channel)
  * @method string getUid()
  * @method void setUid(string $uid)
  * @method string getPayload()
@@ -21,9 +19,6 @@ class PushEvent extends Entity implements JsonSerializable {
 
 	/** @var string */
 	protected $name;
-
-	/** @var string */
-	protected $channel;
 
 	/** @var string */
 	protected $uid;
@@ -38,7 +33,6 @@ class PushEvent extends Entity implements JsonSerializable {
 		return [
 			'id' => $this->getId(),
 			'name' => $this->getName(),
-			'channel' => $this->getChannel(),
 			'payload' => json_decode($this->getPayload(), true),
 			'createdAt' => $this->getCreatedAt(),
 		];
