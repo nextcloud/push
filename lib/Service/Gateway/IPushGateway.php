@@ -14,6 +14,6 @@ interface IPushGateway {
 	 * @param JsonSerializable $payload
 	 * @throws ServiceException
 	 */
-	public function push(string $name, string $channel, string $uid, JsonSerializable $payload): void;
+	public function push(string $name, string $uid, JsonSerializable $payload): void;
 
 }

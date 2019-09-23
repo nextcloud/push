@@ -22,9 +22,12 @@
 	},
 	"dependencies": {
 		"moment": "^2.24.0",
+		"nextcloud-auth": "0.0.3",
+		"nextcloud-axios": "latest",
+		"nextcloud-event-bus": "0.0.3",
+		"nextcloud-initial-state": "0.0.3",
 		"nextcloud-vue": "^0.13.0",
-		"vue": "latest",
-		"nextcloud-axios": "latest"
+		"vue": "latest"
 	},
 	"browserslist": [
 		"last 2 versions",

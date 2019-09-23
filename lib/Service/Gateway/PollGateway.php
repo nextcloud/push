@@ -22,7 +22,6 @@ class PollGateway implements IPushGateway {
 	}
 
 	public function push(string $name,
-						 string $channel,
 						 string $uid,
 						 JsonSerializable $payload): void {
 		$pushEvent = new PushEvent();

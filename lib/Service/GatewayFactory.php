@@ -30,7 +30,7 @@ class GatewayFactory {
 	public function getGateway(): IPushGateway {
 		// TODO: add fallback magic
 
-		return $this->pollGateway;
+		//return $this->pollGateway;
 
 		// docker run -e JWT_KEY='!ChangeMe!' -e DEMO=1 -e ALLOW_ANONYMOUS=1 -e CORS_ALLOWED_ORIGINS='https://localhost' -e ADDR=':3000' -p 3000:3000 dunglas/mercure
 		return new MercureGateway(

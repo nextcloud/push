@@ -25,10 +25,14 @@ namespace OCA\Push\AppInfo;
 
 use OCA\Push\Listener\BroadcastListener;
 use OCA\Push\Listener\CspListener;
+use OCA\Push\Service\Gateway\MercureGateway;
+use OCA\Push\Service\GatewayFactory;
 use OCP\AppFramework\IAppContainer;
 use OCP\Broadcast\Events\IBroadcastEvent;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\IInitialStateService;
 use OCP\Security\CSP\AddContentSecurityPolicyEvent;
+use OCP\Util;
 
 class BootstrapSingleton {
 
@@ -58,9 +62,22 @@ class BootstrapSingleton {
 			return;
 		}
 
+		$this->registerClientSideAdapter($this->container);
 		$this->registerEvents($this->container);
 
 		$this->booted = true;
+	}
+
+	private function registerClientSideAdapter(IAppContainer $container) {
+		/** @var GatewayFactory $factory */
+		$factory = $container->query(GatewayFactory::class);
+		$gateway = $factory->getGateway();
+		if ($gateway instanceof MercureGateway) {
+			/** @var IInitialStateService $initialState */
+			$initialState = $container->query(IInitialStateService::class);
+			$initialState->provideInitialState(Application::APP_NAME, 'mercure_url', $gateway->getUrl());
+			Util::addScript(Application::APP_NAME, 'mercure-bus-adapter');
+		}
 	}
 
 	private function registerEvents(IAppContainer $container): void {

@@ -27,7 +27,6 @@ class MercureGateway implements IPushGateway {
 	}
 
 	public function push(string $name,
-						 string $channel,
 						 string $uid,
 						 JsonSerializable $payload): void {
 		$client = $this->clientService->newClient();
@@ -40,7 +39,7 @@ class MercureGateway implements IPushGateway {
 						'Authorization' => 'Bearer ' . $this->jwt,
 					],
 					'body' => [
-						'topic' => $channel,
+						'topic' => $uid,
 						'data' => json_encode($payload->jsonSerialize()),
 					]
 				]

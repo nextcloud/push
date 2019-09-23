@@ -32,7 +32,6 @@ class BroadcastListener implements IEventListener {
 			try {
 				$this->pushService->push(
 					$event->getName(),
-					$event->getChannel(),
 					$uid,
 					$event->getPayload()
 				);
