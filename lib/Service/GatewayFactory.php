@@ -28,13 +28,17 @@ class GatewayFactory {
 	}
 
 	public function getGateway(): IPushGateway {
-		// TODO: add fallback magic
-
-		return $this->pollGateway;
+		$mercureConfig = $this->config->getSystemValue('push_mercure', false);
+		if ($mercureConfig === false
+			|| !isset($mercureConfig['hub_url'], $mercureConfig['jwt_secret'])) {
+			// Fallback
+			return $this->pollGateway;
+		}
 
 		// docker run -e JWT_KEY='!ChangeMe!' -e DEMO=1 -e ALLOW_ANONYMOUS=1 -e CORS_ALLOWED_ORIGINS='https://localhost' -e ADDR=':3000' -p 3000:3000 dunglas/mercure
+		// TODO: use $mercureConfig['jwt_secret']
 		return new MercureGateway(
-			'http://localhost:3000/hub',
+			$mercureConfig['hub_url'],
 			'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsidGVzdCJdfX0.NLMVrVws6SNZQppDf9DvJ8knkJNr2ooCfaQdhzXjMWI',
 			$this->clientService
 		);

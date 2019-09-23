@@ -66,6 +66,8 @@ const broadcastMercureEvents = (uid, hubUrl) => {
 	url.searchParams.append('topic', uid)
 	const source = new EventSource(url)
 
+	// TODO: authenticate
+
 	source.onmessage = e => processSse(JSON.parse(e.data))
 }
 
