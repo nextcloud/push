@@ -10,6 +10,9 @@ use OCP\IConfig;
 
 class GatewayFactory {
 
+	/** @var IPushGateway|null */
+	private $gateway = null;
+
 	/** @var IConfig */
 	private $config;
 
@@ -28,20 +31,24 @@ class GatewayFactory {
 	}
 
 	public function getGateway(): IPushGateway {
-		$mercureConfig = $this->config->getSystemValue('push_mercure', false);
-		if ($mercureConfig === false
-			|| !isset($mercureConfig['hub_url'], $mercureConfig['jwt_secret'])) {
-			// Fallback
-			return $this->pollGateway;
+		if ($this->gateway === null) {
+			$mercureConfig = $this->config->getSystemValue('push_mercure', false);
+			if ($mercureConfig === false
+				|| !isset($mercureConfig['hub_url'], $mercureConfig['jwt_secret'])) {
+				// Fallback
+				return $this->gateway = $this->pollGateway;
+			}
+
+			// docker run -e JWT_KEY='!ChangeMe!' -e DEMO=1 -e ALLOW_ANONYMOUS=1 -e CORS_ALLOWED_ORIGINS='https://localhost' -e ADDR=':3000' -p 3000:3000 dunglas/mercure
+			// TODO: use $mercureConfig['jwt_secret']
+			return $this->gateway = new MercureGateway(
+				$mercureConfig['hub_url'],
+				'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsidGVzdCJdfX0.NLMVrVws6SNZQppDf9DvJ8knkJNr2ooCfaQdhzXjMWI',
+				$this->clientService
+			);
 		}
 
-		// docker run -e JWT_KEY='!ChangeMe!' -e DEMO=1 -e ALLOW_ANONYMOUS=1 -e CORS_ALLOWED_ORIGINS='https://localhost' -e ADDR=':3000' -p 3000:3000 dunglas/mercure
-		// TODO: use $mercureConfig['jwt_secret']
-		return new MercureGateway(
-			$mercureConfig['hub_url'],
-			'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsidGVzdCJdfX0.NLMVrVws6SNZQppDf9DvJ8knkJNr2ooCfaQdhzXjMWI',
-			$this->clientService
-		);
+		return $this->gateway;
 	}
 
 }
