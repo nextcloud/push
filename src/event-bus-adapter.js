@@ -51,18 +51,14 @@ const init = uid => {
 }
 
 const processSse = data => {
-	if (data === undefined || data.payload === undefined) {
-		logger.warn('Ignoring event with invalid payload')
-		return
-	}
-	if (data.payload.name === undefined) {
-		logger.warn('Ignoring event without name', e)
+	if (data.name === undefined) {
+		logger.warn('Ignoring event without name', {data})
 		return
 	}
 
-	logger.debug('received ' + data.payload.name + ' event from the server')
+	logger.debug('received ' + data.name + ' event from the server', {data})
 
-	emit(data.payload)
+	emit(data)
 }
 
 const broadcastMercureEvents = (uid, hubUrl) => {
