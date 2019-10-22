@@ -20,7 +20,7 @@
  */
 
 import Axios from 'nextcloud-axios'
-import {emit} from 'nextcloud-event-bus'
+import {emit} from '@nextcloud/event-bus'
 import {generateUrl} from 'nextcloud-router'
 import {getCurrentUser} from 'nextcloud-auth'
 import {loadState} from 'nextcloud-initial-state'
