@@ -11,5 +11,8 @@
   ],
   "require": {
     "daita/my-small-php-tools": "dev-master"
+  },
+  "scripts": {
+    "lint": "find . -name \\*.php -not -path './vendor/*' -exec php -l \"{}\" \\;"
   }
 }
