@@ -21,15 +21,15 @@
 		"test:coverage": "jest --coverage"
 	},
 	"dependencies": {
+		"@nextcloud/auth": "^1.2.3",
+		"@nextcloud/axios": "^1.3.2",
 		"@nextcloud/event-bus": "^0.2.1",
+		"@nextcloud/initial-state": "^1.1.2",
+		"@nextcloud/logger": "^1.1.2",
+		"@nextcloud/router": "^1.0.2",
 		"moment": "^2.24.0",
-		"nextcloud-auth": "0.0.3",
-		"nextcloud-axios": "latest",
-		"nextcloud-initial-state": "0.0.3",
 		"nextcloud-vue": "^0.13.0",
-		"nextcloud-logger": "0.0.6",
-		"nextcloud-router": "0.0.9",
-		"vue": "latest"
+		"vue": "^2.6.11"
 	},
 	"browserslist": [
 		"last 2 versions",
@@ -70,7 +70,7 @@
 		"vue-jest": "^3.0.5",
 		"vue-loader": "^15.9.1",
 		"vue-style-loader": "^4.1.1",
-		"vue-template-compiler": "^2.6.10",
+		"vue-template-compiler": "^2.6.11",
 		"webpack": "^4.42.1",
 		"webpack-cli": "^3.3.11",
 		"webpack-merge": "^4.2.2"

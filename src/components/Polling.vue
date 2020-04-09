@@ -27,7 +27,7 @@
 </style>
 
 <script>
-import axios from 'nextcloud-axios'
+import axios from '@nextcloud/axios'
 
 export default {
 	name: 'Polling',

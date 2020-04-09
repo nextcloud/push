@@ -19,11 +19,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Axios from 'nextcloud-axios'
+import Axios from '@nextcloud/axios'
 import {emit} from '@nextcloud/event-bus'
-import {generateUrl} from 'nextcloud-router'
-import {getCurrentUser} from 'nextcloud-auth'
-import {loadState} from 'nextcloud-initial-state'
+import {generateUrl} from '@nextcloud/router'
+import {getCurrentUser} from '@nextcloud/auth'
+import {loadState} from '@nextcloud/initial-state'
 
 import logger from './logger'
 
