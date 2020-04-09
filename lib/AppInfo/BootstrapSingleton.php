@@ -23,6 +23,7 @@
 
 namespace OCA\Push\AppInfo;
 
+use OCA\Push\Helper\JWT;
 use OCA\Push\Listener\BroadcastListener;
 use OCA\Push\Listener\CspListener;
 use OCA\Push\Service\Gateway\MercureGateway;
@@ -31,7 +32,9 @@ use OCP\AppFramework\IAppContainer;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Broadcast\Events\IBroadcastEvent;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\IConfig;
 use OCP\IInitialStateService;
+use OCP\IUserSession;
 use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 use OCP\Util;
 
@@ -79,11 +82,26 @@ class BootstrapSingleton {
 			$factory = $this->container->query(GatewayFactory::class);
 			/** @var ITimeFactory $timeFactory */
 			$timeFactory = $this->container->query(ITimeFactory::class);
+
+
+			/** @var IUserSession $userSession */
+			$userSession = $this->container->query(IUserSession::class);
+			/** @var IConfig $config */
+			$config = $this->container->query(IConfig::class);
+			$mercureConfig = $config->getSystemValue('push_mercure', false);
+
+			$jwt = null;
+			if ($mercureConfig !== false && $userSession->getUser() !== null) {
+				$uid = $userSession->getUser()->getUID();
+				$jwt = JWT::generateJWT(['users/'.$uid], [], $mercureConfig['jwt_secret']);
+			}
+
 			$gateway = $factory->getGateway();
 			if ($gateway instanceof MercureGateway) {
 				return [
 					'gateway' => 'mercure',
 					'hubUrl' => $gateway->getUrl(),
+					'jwt' => $jwt,
 				];
 			}
 

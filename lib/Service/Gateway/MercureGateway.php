@@ -32,18 +32,21 @@ class MercureGateway implements IPushGateway {
 						 JsonSerializable $payload): void {
 		$client = $this->clientService->newClient();
 
-		$jwt = JWT::generateJWT([], [ $uid ], $this->jwtSecret);
+		$jwt = JWT::generateJWT(['users/'.$uid], [ 'users/'.$uid ], $this->jwtSecret);
 
 		try {
 			$client->post(
-				$this->url,
+				$this->url . '/.well-known/mercure',
 				[
 					'headers' => [
 						'Authorization' => 'Bearer ' . $jwt,
 					],
 					'body' => [
-						'topic' => $uid,
-						'data' => json_encode($payload->jsonSerialize()),
+						'topic' => 'users/' . $uid,
+						'data' => json_encode([
+							'name' => $name,
+							'payload' => $payload
+						]),
 					]
 				]
 			);

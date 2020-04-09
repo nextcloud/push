@@ -24,6 +24,7 @@ import {emit} from '@nextcloud/event-bus'
 import {generateUrl} from '@nextcloud/router'
 import {getCurrentUser} from '@nextcloud/auth'
 import {loadState} from '@nextcloud/initial-state'
+import { EventSourcePolyfill } from 'event-source-polyfill';
 
 import logger from './logger'
 
@@ -39,7 +40,7 @@ const init = uid => {
 	switch (config.gateway) {
 		case 'mercure':
 			logger.debug('using Mercure as SSE source')
-			broadcastMercureEvents(uid, config.hubUrl)
+			broadcastMercureEvents(uid, config.hubUrl, config.jwt)
 			break;
 		case 'poll':
 			logger.debug('using the poll endpoint as SSE source')
@@ -61,12 +62,14 @@ const processSse = data => {
 	emit(data)
 }
 
-const broadcastMercureEvents = (uid, hubUrl) => {
-	const url = new URL(hubUrl)
-	url.searchParams.append('topic', uid)
-	const source = new EventSource(url)
-
-	// TODO: authenticate
+const broadcastMercureEvents = (uid, hubUrl, jwt) => {
+	const url = new URL(hubUrl + '/.well-known/mercure')
+	url.searchParams.append('topic', 'users/' + uid)
+	const source = new EventSourcePolyfill(url, {
+		headers: {
+			'Authorization': 'Bearer ' + jwt,
+		}
+	})
 
 	source.onmessage = e => processSse(JSON.parse(e.data))
 }
