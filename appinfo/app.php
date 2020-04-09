@@ -30,6 +30,4 @@ declare(strict_types=1);
 
 namespace OCA\Push\AppInfo;
 
-require_once __DIR__ . '/autoload.php';
-
-$app = \OC::$server->query(Application::class);
+\OC::$server->query(Application::class);
