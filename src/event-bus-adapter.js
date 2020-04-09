@@ -20,11 +20,11 @@
  */
 
 import Axios from '@nextcloud/axios'
-import {emit} from '@nextcloud/event-bus'
-import {generateUrl} from '@nextcloud/router'
-import {getCurrentUser} from '@nextcloud/auth'
-import {loadState} from '@nextcloud/initial-state'
-import { EventSourcePolyfill } from 'event-source-polyfill';
+import { emit } from '@nextcloud/event-bus'
+import { generateUrl } from '@nextcloud/router'
+import { getCurrentUser } from '@nextcloud/auth'
+import { loadState } from '@nextcloud/initial-state'
+import { EventSourcePolyfill } from 'event-source-polyfill'
 
 import logger from './logger'
 
@@ -33,31 +33,31 @@ const init = uid => {
 	try {
 		config = loadState('push', 'config')
 	} catch (error) {
-		logger.error('No Mercure config set', {error})
+		logger.error('No Mercure config set', { error })
 		return
 	}
 
 	switch (config.gateway) {
-		case 'mercure':
-			logger.debug('using Mercure as SSE source')
-			broadcastMercureEvents(uid, config.hubUrl, config.jwt)
-			break;
-		case 'poll':
-			logger.debug('using the poll endpoint as SSE source')
-			broadcastPollEvents(config.now)
-			break;
-		default:
-			logger.error('invalid push gateway ' + config.gateway)
+	case 'mercure':
+		logger.debug('using Mercure as SSE source')
+		broadcastMercureEvents(uid, config.hubUrl, config.jwt)
+		break
+	case 'poll':
+		logger.debug('using the poll endpoint as SSE source')
+		broadcastPollEvents(config.now)
+		break
+	default:
+		logger.error('invalid push gateway ' + config.gateway)
 	}
 }
 
 const processSse = data => {
 	if (data.name === undefined) {
-		logger.warn('Ignoring event without name', {data})
+		logger.warn('Ignoring event without name', { data })
 		return
 	}
 
-	logger.debug('received ' + data.name + ' event from the server', {data})
+	logger.debug('received ' + data.name + ' event from the server', { data })
 
 	emit(data)
 }
@@ -67,7 +67,7 @@ const broadcastMercureEvents = (uid, hubUrl, jwt) => {
 	url.searchParams.append('topic', 'users/' + uid)
 	const source = new EventSourcePolyfill(url, {
 		headers: {
-			'Authorization': 'Bearer ' + jwt,
+			'Authorization': 'Bearer ' + jwt
 		}
 	})
 
@@ -77,7 +77,7 @@ const broadcastMercureEvents = (uid, hubUrl, jwt) => {
 const broadcastPollEvents = offset => {
 	setTimeout(() => {
 		const url = generateUrl('/apps/push/poll?cursor={cursor}', {
-			cursor: offset,
+			cursor: offset
 		})
 
 		Axios.get(url)
@@ -99,18 +99,17 @@ const broadcastPollEvents = offset => {
 				}
 			})
 			.catch(error => {
-				logger.error('polling failed', {error})
+				logger.error('polling failed', { error })
 
 				// Retry from previous offset to hopefully catch all events
 				broadcastPollEvents(offset)
 			})
 	}, 10 * 1000)
 
-
 }
 
 // Only connect to Mercure for logged in users
-const user = getCurrentUser();
+const user = getCurrentUser()
 if (user !== null) {
 	init(user.uid)
 }
