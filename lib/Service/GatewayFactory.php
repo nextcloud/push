@@ -43,7 +43,7 @@ class GatewayFactory {
 			// TODO: use $mercureConfig['jwt_secret']
 			return $this->gateway = new MercureGateway(
 				$mercureConfig['hub_url'],
-				'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsidGVzdCJdfX0.NLMVrVws6SNZQppDf9DvJ8knkJNr2ooCfaQdhzXjMWI',
+				$mercureConfig['jwt_secret'],
 				$this->clientService
 			);
 		}

@@ -5,6 +5,7 @@ namespace OCA\Push\Service\Gateway;
 use Exception;
 use JsonSerializable;
 use OCA\Push\Exception\PushException;
+use OCA\Push\Helper\JWT;
 use OCP\Http\Client\IClientService;
 
 class MercureGateway implements IPushGateway {
@@ -13,16 +14,16 @@ class MercureGateway implements IPushGateway {
 	private $url;
 
 	/** @var string */
-	private $jwt;
+	private $jwtSecret;
 
 	/** @var IClientService */
 	private $clientService;
 
 	public function __construct(string $url,
-								string $jwt,
+								string $jwtSecret,
 								IClientService $clientService) {
 		$this->url = $url;
-		$this->jwt = $jwt;
+		$this->jwtSecret = $jwtSecret;
 		$this->clientService = $clientService;
 	}
 
@@ -31,12 +32,14 @@ class MercureGateway implements IPushGateway {
 						 JsonSerializable $payload): void {
 		$client = $this->clientService->newClient();
 
+		$jwt = JWT::generateJWT([], [ $uid ], $this->jwtSecret);
+
 		try {
 			$client->post(
 				$this->url,
 				[
 					'headers' => [
-						'Authorization' => 'Bearer ' . $this->jwt,
+						'Authorization' => 'Bearer ' . $jwt,
 					],
 					'body' => [
 						'topic' => $uid,
