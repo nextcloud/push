@@ -32,4 +32,4 @@ namespace OCA\Push\AppInfo;
 
 require_once __DIR__ . '/autoload.php';
 
-$app = new Application();
+$app = \OC::$server->query(Application::class);

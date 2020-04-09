@@ -27,17 +27,20 @@
 
 namespace OCA\Push\AppInfo;
 
-use OC;
-use OCA\Push\Helper\PushHelper;
+use OCA\Push\Helper\JWT;
 use OCA\Push\Listener\BroadcastListener;
-use OCA\Push\Service\Extensions\NextcloudFilesAppService;
-use OCA\Push\Service\PushService;
+use OCA\Push\Listener\CspListener;
+use OCA\Push\Service\Gateway\MercureGateway;
+use OCA\Push\Service\GatewayFactory;
 use OCP\AppFramework\App;
 use OCP\AppFramework\IAppContainer;
-use OCP\AppFramework\QueryException;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Broadcast\Events\IBroadcastEvent;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCP\Push\IPushManager;
+use OCP\IConfig;
+use OCP\IInitialStateService;
+use OCP\IUserSession;
+use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 use OCP\Util;
 
 class Application extends App {
@@ -50,7 +53,56 @@ class Application extends App {
 	public function __construct(array $params = []) {
 		parent::__construct(self::APP_NAME, $params);
 
-		BootstrapSingleton::getInstance($this->getContainer())->boot();
+		$container = $this->getContainer();
+		$this->registerClientSideAdapter($container);
+		$this->registerEvents($container);
 	}
 
+	private function registerClientSideAdapter(IAppContainer $container) {
+		Util::addScript(Application::APP_NAME, 'event-bus-adapter');
+
+		/** @var IInitialStateService $initialState */
+		$initialState = $container->query(IInitialStateService::class);
+		$initialState->provideLazyInitialState(Application::APP_NAME, 'config', function () use ($container) {
+			/** @var GatewayFactory $factory */
+			$factory = $container->query(GatewayFactory::class);
+			/** @var ITimeFactory $timeFactory */
+			$timeFactory = $container->query(ITimeFactory::class);
+
+
+			/** @var IUserSession $userSession */
+			$userSession = $container->query(IUserSession::class);
+			/** @var IConfig $config */
+			$config = $container->query(IConfig::class);
+			$mercureConfig = $config->getSystemValue('push_mercure', false);
+
+			$jwt = null;
+			if ($mercureConfig !== false && $userSession->getUser() !== null) {
+				$uid = $userSession->getUser()->getUID();
+				$jwt = JWT::generateJWT(['users/'.$uid], [], $mercureConfig['jwt_secret']);
+			}
+
+			$gateway = $factory->getGateway();
+			if ($gateway instanceof MercureGateway) {
+				return [
+					'gateway' => 'mercure',
+					'hubUrl' => $gateway->getUrl(),
+					'jwt' => $jwt,
+				];
+			}
+
+			return [
+				'gateway' => 'poll',
+				'now' => $timeFactory->getTime(),
+			];
+		});
+	}
+
+	private function registerEvents(IAppContainer $container): void {
+		/** @var IEventDispatcher $dispatcher */
+		$dispatcher = $container->query(IEventDispatcher::class);
+
+		$dispatcher->addServiceListener(AddContentSecurityPolicyEvent::class, CspListener::class);
+		$dispatcher->addServiceListener(IBroadcastEvent::class, BroadcastListener::class);
+	}
 }
