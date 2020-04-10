@@ -59,7 +59,7 @@ const processSse = data => {
 
 	logger.debug('received ' + data.name + ' event from the server', { data })
 
-	emit(data)
+	emit(data.name, data.payload)
 }
 
 const broadcastMercureEvents = (uid, hubUrl, jwt) => {
