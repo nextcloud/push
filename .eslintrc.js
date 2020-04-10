@@ -48,11 +48,9 @@ module.exports = {
 	extends: [
 		'eslint:recommended',
 		'plugin:node/recommended',
-		'plugin:vue/essential',
-		'plugin:vue/recommended',
 		'standard'
 	],
-	plugins: ['vue', 'node'],
+	plugins: ['node'],
 	rules: {
 		// space before function ()
 		'space-before-function-paren': ['error', 'never'],
@@ -65,7 +63,6 @@ module.exports = {
 		// tabs only
 		indent: ['error', 'tab'],
 		'no-tabs': 0,
-		'vue/html-indent': ['error', 'tab'],
 		// only debug console
 		'no-console': ['error', {allow: ['error', 'warn', 'debug']}],
 		// classes blocks
@@ -76,27 +73,7 @@ module.exports = {
 		'multiline-ternary': ['error', 'always-multiline'],
 		// es6 import/export and require
 		'node/no-unpublished-require': ['off'],
-		'node/no-unsupported-features/es-syntax': ['off'],
-		// kebab case components for vuejs
-		'vue/component-name-in-template-casing': ['error', 'kebab-case'],
-		// space before self-closing elements
-		'vue/html-closing-bracket-spacing': 'error',
-		// newline before closing bracket
-		'vue/html-closing-bracket-newline': ["error", {
-			"singleline": "never",
-			"multiline": "never"
-		}
-		],
-		// code spacing with attributes
-		'vue/max-attributes-per-line': [
-			'error',
-			{
-				singleline: 3,
-				multiline: {
-					max: 3,
-					allowFirstLine: true
-				}
-			}
+		'node/no-unsupported-features/es-syntax': ['off']
 		]
 	}
 }
