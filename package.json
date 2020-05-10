@@ -21,7 +21,7 @@
 		"test:coverage": "jest --coverage"
 	},
 	"dependencies": {
-		"moment": "^2.25.1",
+		"moment": "^2.25.3",
 		"nextcloud-vue": "^0.13.0",
 		"vue": "latest",
 		"nextcloud-axios": "latest"
