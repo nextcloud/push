@@ -1,12 +1,11 @@
+<?php
 
-/*
- * Push - Nextcloud Push Service
+declare(strict_types=1);
+/**
+ * @copyright Copyright (c) 2020, Roeland Jago Douma <roeland@famdouma.nl>
  *
- * This file is licensed under the Affero General Public License version 3 or
- * later. See the COPYING file.
+ * @author Roeland Jago Douma <roeland@famdouma.nl>
  *
- * @author Maxence Lange <maxence@artificial-owl.com>
- * @copyright 2019
  * @license GNU AGPL version 3 or any later version
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,28 +23,12 @@
  *
  */
 
-const path = require('path')
+namespace OCA\Push\Service\Gateway;
 
-module.exports = {
-	entry: {
-		'event-bus-adapter': path.join(__dirname, 'src', 'event-bus-adapter.js'),
-	},
-	output: {
-		path: path.resolve(__dirname, './js'),
-		publicPath: '/js/',
-		filename: '[name].js',
-		chunkFilename: '[name].[chunkhash].js'
-	},
-	module: {
-		rules: [
-			{
-				test: /\.js$/,
-				loader: 'babel-loader',
-				exclude: /node_modules/
-			}
-		]
-	},
-	resolve: {
-		extensions: ['*', '.js', '.json']
+use JsonSerializable;
+
+class FailedGateway implements IPushGateway {
+	public function push(string $name, string $uid, JsonSerializable $payload): void {
+
 	}
 }

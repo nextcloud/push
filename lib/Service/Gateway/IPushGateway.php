@@ -8,12 +8,10 @@ use OCA\Push\Exception\ServiceException;
 interface IPushGateway {
 
 	/**
-	 * @param string $name
-	 * @param string $channel
-	 * @param string $uid
-	 * @param JsonSerializable $payload
+	 * @param string $topic
+     * @param JsonSerializable $payload
 	 * @throws ServiceException
 	 */
-	public function push(string $name, string $uid, JsonSerializable $payload): void;
+	public function push(string $topic, JsonSerializable $payload): void;
 
 }
