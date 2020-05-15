@@ -19,8 +19,7 @@
 	<website>https://github.com/nextcloud/push</website>
 	<bugs>https://github.com/nextcloud/push/issues</bugs>
 	<repository>https://github.com/nextcloud/push.git</repository>
-	<screenshot>https://raw.githubusercontent.com/nextcloud/push/master/screenshots/0.3.0.png</screenshot>
 	<dependencies>
-		<nextcloud min-version="19" max-version="19"/>
+		<nextcloud min-version="20" max-version="20"/>
 	</dependencies>
 </info>
