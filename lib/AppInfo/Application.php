@@ -27,21 +27,13 @@
 
 namespace OCA\Push\AppInfo;
 
-use OCA\Push\Helper\JWT;
-use OCA\Push\Listener\BroadcastListener;
 use OCA\Push\Listener\CspListener;
-use OCA\Push\Service\Gateway\MercureGateway;
-use OCA\Push\Service\GatewayFactory;
+use OCA\Push\Service\PushClient;
 use OCP\AppFramework\App;
 use OCP\AppFramework\IAppContainer;
-use OCP\AppFramework\Utility\ITimeFactory;
-use OCP\Broadcast\Events\IBroadcastEvent;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCP\IConfig;
-use OCP\IInitialStateService;
-use OCP\IUserSession;
+use OCP\Push\IManager;
 use OCP\Security\CSP\AddContentSecurityPolicyEvent;
-use OCP\Util;
 
 class Application extends App {
 
@@ -55,12 +47,18 @@ class Application extends App {
 
 		$container = $this->getContainer();
 		$this->registerEvents($container);
+		$this->registerApp($container);
+	}
+
+	private function registerApp(IAppContainer $container): void {
+		/** @var IManager $manager */
+		$manager = $container->query(IManager::class);
+		$manager->registerPushApp(PushClient::class);
 	}
 
 	private function registerEvents(IAppContainer $container): void {
 		/** @var IEventDispatcher $dispatcher */
 		$dispatcher = $container->query(IEventDispatcher::class);
-
 		$dispatcher->addServiceListener(AddContentSecurityPolicyEvent::class, CspListener::class);
 	}
 }

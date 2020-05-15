@@ -28,7 +28,7 @@ namespace OCA\Push\Service\Gateway;
 use JsonSerializable;
 
 class FailedGateway implements IPushGateway {
-	public function push(string $name, string $uid, JsonSerializable $payload): void {
+	public function push(string $topic, JsonSerializable $payload): void {
 
 	}
 }

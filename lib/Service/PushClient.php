@@ -23,7 +23,7 @@ declare(strict_types=1);
  *
  */
 
-namespace OCA\Push;
+namespace OCA\Push\Service;
 
 use OCA\Push\Exception\PushException;
 use OCA\Push\Helper\JWT;
