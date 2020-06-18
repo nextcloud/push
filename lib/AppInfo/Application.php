@@ -30,12 +30,15 @@ namespace OCA\Push\AppInfo;
 use OCA\Push\Listener\CspListener;
 use OCA\Push\Service\PushClient;
 use OCP\AppFramework\App;
+use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\IAppContainer;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Push\IManager;
 use OCP\Security\CSP\AddContentSecurityPolicyEvent;
 
-class Application extends App {
+class Application extends App implements IBootstrap {
 
 	const APP_NAME = 'push';
 
@@ -44,21 +47,14 @@ class Application extends App {
 	 */
 	public function __construct(array $params = []) {
 		parent::__construct(self::APP_NAME, $params);
-
-		$container = $this->getContainer();
-		$this->registerEvents($container);
-		$this->registerApp($container);
 	}
 
-	private function registerApp(IAppContainer $container): void {
-		/** @var IManager $manager */
-		$manager = $container->query(IManager::class);
-		$manager->registerPushApp(PushClient::class);
+	public function register(IRegistrationContext $context): void {
+		$context->registerPushApp(PushClient::class);
+		$context->registerEventListener(AddContentSecurityPolicyEvent::class, CspListener::class);
 	}
 
-	private function registerEvents(IAppContainer $container): void {
-		/** @var IEventDispatcher $dispatcher */
-		$dispatcher = $container->query(IEventDispatcher::class);
-		$dispatcher->addServiceListener(AddContentSecurityPolicyEvent::class, CspListener::class);
+	public function boot(IBootContext $context): void {
+
 	}
 }
