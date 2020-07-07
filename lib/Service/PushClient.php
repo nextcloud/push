@@ -90,7 +90,7 @@ class PushClient implements IPushApp {
 		$hub = $mercureConfig['hub_url'];
 
 		$topic = $appId . '/' . $topic;
-		return $hub . '/.well-known/mercure/' . $topic;
+		return $hub . '/.well-known/mercure?topic=' . $topic;
 	}
 
 }
