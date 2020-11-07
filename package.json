@@ -22,7 +22,7 @@
 	},
 	"dependencies": {
 		"moment": "^2.29.1",
-		"nextcloud-vue": "^0.13.0",
+		"nextcloud-vue": "^0.13.1",
 		"vue": "latest",
 		"nextcloud-axios": "latest"
 	},
